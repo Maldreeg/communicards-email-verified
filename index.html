@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Verified - Communicards</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.36.0/dist/supabase.min.js"></script>
+    <script>
+    // Initialize Supabase client
+    const supabaseUrl = 'https://dcgaxjhedemrmdnnxtxu.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjZ2F4amhlZGVtcm1kbm54dHh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDI1MTAsImV4cCI6MjA1NjU3ODUxMH0.Eb2ABVZDjjJBex8RbikJzkr6wvTvNcd7z7u38glzpME'; // Public anon key is safe for client-side verification
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    </script>
     <style>
         * {
             margin: 0;
@@ -337,6 +344,40 @@
         }
 
         window.addEventListener('load', createSparkle);
+    </script>
+
+    <script>
+    // Verify email with Supabase
+        async function verifyEmail() {
+            const params = new URLSearchParams(window.location.search);
+            const confirmationUrl = params.get('confirmation_url');
+
+            if (!confirmationUrl) {
+                alert('Missing confirmation link.');
+                return;
+            }
+
+            try {
+                const token = new URL(confirmationUrl).searchParams.get('token');
+                if (!token) {
+                    alert('Invalid confirmation link.');
+                    return;
+                }
+
+                const { error } = await supabase.auth.verifyOtp({ type: 'signup', token });
+
+                if (error) {
+                    alert('Verification failed: ' + error.message);
+                } else {
+                    // Show verified UI
+                    document.querySelector('.container').style.display = 'block';
+                }
+            } catch (err) {
+                alert('Verification error: ' + err.message);
+            }
+        }
+
+        window.addEventListener('load', verifyEmail);
     </script>
 </body>
 </html>
