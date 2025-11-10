@@ -341,46 +341,37 @@
     </script>
 
     <script>
+        // Verify email using supabase.auth.updateUser
         window.addEventListener('load', async () => {
-            // Initialize Supabase client
-            const supabaseUrl = 'https://dcgaxjhedemrmdnnxtxu.supabase.co';
-            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjZ2F4amhlZGVtcm1kbm54dHh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDI1MTAsImV4cCI6MjA1NjU3ODUxMH0.Eb2ABVZDjjJBex8RbikJzkr6wvTvNcd7z7u38glzpME';
-            const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseUrl = 'https://dcgaxjhedemrmdnnxtxu.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjZ2F4amhlZGVtcm1kbm54dHh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMDI1MTAsImV4cCI6MjA1NjU3ODUxMH0.Eb2ABVZDjjJBex8RbikJzkr6wvTvNcd7z7u38glzpME';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-            const params = new URLSearchParams(window.location.search);
-            const confirmationUrl = params.get('confirmation_url');
+        const params = new URLSearchParams(window.location.search);
+        const confirmationUrl = params.get('confirmation_url');
 
-            if (!confirmationUrl) {
-                alert('Missing confirmation link.');
-                return;
+        if (!confirmationUrl) {
+            alert('Missing confirmation link.');
+            return;
+        }
+
+        try {
+            // Use updateUser with email_confirm
+            const { error } = await supabase.auth.updateUser({ email_confirm: confirmationUrl });
+
+            if (error) {
+            alert('Verification failed: ' + error.message);
+            } else {
+            // Show verified UI
+            document.querySelector('.container').style.display = 'block';
+            // Remove token from URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            // Optional: redirect to landing page
+            // setTimeout(() => { window.location.href = 'https://maldreeg.github.io/communicards/'; }, 3000);
             }
-
-            try {
-                const token = new URL(confirmationUrl).searchParams.get('token');
-                if (!token) {
-                    alert('Invalid confirmation link.');
-                    return;
-                }
-
-                const { error } = await supabase.auth.verifyOtp({ type: 'signup', token });
-
-                if (error) {
-                    alert('Verification failed: ' + error.message);
-                } else {
-                    // Show verified UI
-                    document.querySelector('.container').style.display = 'block';
-
-                    // Remove token from URL for security
-                    window.history.replaceState({}, document.title, window.location.pathname);
-
-                    // Optional: redirect to your landing page after a few seconds
-                    // setTimeout(() => {
-                    //     window.location.href = 'https://maldreeg.github.io/communicards/';
-                    // }, 3000);
-                }
-            } catch (err) {
-                alert('Verification error: ' + err.message);
-            }
+        } catch (err) {
+            alert('Verification error: ' + err.message);
+        }
         });
     </script>
 </body>
